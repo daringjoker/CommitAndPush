@@ -1,0 +1,15 @@
+[package]
+name = "commitAndPush"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.32", features = ["derive"] }
+openai-api-rs = "6.0.3"
+serde = "1.0.219"
+tokio = "1.44.1"
+toml = "0.8.20"
+
+[[bin]]
+name = "commitAndPush"
+path = "src/main.rs"
