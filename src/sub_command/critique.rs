@@ -18,6 +18,14 @@ impl SubCommand for Critique {
 
         let diff = String::from_utf8(diffcommand.stdout).unwrap();
 
+        if diff.is_empty() {
+            println!(
+                "No changes detected in the current branch against base branch : '{}'",
+                config.base_branch
+            );
+            return Ok(());
+        }
+
         let ai = AI::new(diff.into());
 
         let review_prompt = "You are a patient, experienced software engineer acting as a humble teacher. Your task is to review a piece of code—provided as a Git diff or raw snippet—and offer a detailed, constructive critique. The code comes from a skilled developer, and your goal is to gently highlight every possible flaw or improvement, no matter how minor, to help them grow. Your review should be thorough and meticulous, covering the following aspects:

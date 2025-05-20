@@ -1,6 +1,20 @@
 use core::panic;
-use serde::Deserialize;
-use std::{env, fs, path};
+use serde::{de::DeserializeOwned, Deserialize};
+use std::{
+    env, fs,
+    path::{self, PathBuf},
+};
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LocalConfig {
+    pub prefix: Option<String>,
+    pub suffix: Option<String>,
+    pub base_branch: Option<String>,
+    pub default_prompt: Option<String>,
+    #[serde(flatten)]
+    pub categories: std::collections::HashMap<String, CategoryConfig>,
+}
 
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -24,6 +38,38 @@ impl Config {
     pub fn parse() -> Config {
         let home_path = env::var("HOME").unwrap();
         let config_file_path = path::Path::new(&home_path).join(".cnp.toml");
+        let config: Config = Config::parse_from_path(&config_file_path);
+
+        let current_directory = env::current_dir().unwrap();
+        let config_file_path = current_directory.join(".cnp.toml");
+        if config_file_path.exists() {
+            let local_config: LocalConfig = Config::parse_from_path(&config_file_path);
+            return Config::merge_configs(config, local_config);
+        }
+        return config;
+    }
+    fn merge_configs(config: Config, local_config: LocalConfig) -> Config {
+        let mut merged_config = config;
+
+        if let Some(prefix) = local_config.prefix {
+            merged_config.prefix = prefix;
+        }
+        if let Some(suffix) = local_config.suffix {
+            merged_config.suffix = suffix;
+        }
+        if let Some(base_branch) = local_config.base_branch {
+            merged_config.base_branch = base_branch;
+        }
+        if let Some(default_prompt) = local_config.default_prompt {
+            merged_config.default_prompt = default_prompt;
+        }
+        for (key, value) in local_config.categories {
+            merged_config.categories.insert(key, value);
+        }
+        return merged_config;
+    }
+
+    fn parse_from_path<ConfigType: DeserializeOwned>(config_file_path: &PathBuf) -> ConfigType {
         if !fs::exists(&config_file_path).unwrap() {
             println!("Config file not found at: {:?}", config_file_path);
             panic!("Config file not found");
@@ -35,7 +81,7 @@ impl Config {
             panic!("Failed to read config file");
         }
 
-        let copied_config_content: Result<Config, toml::de::Error> =
+        let copied_config_content: Result<ConfigType, toml::de::Error> =
             toml::from_str(&config.unwrap());
 
         if copied_config_content.is_err() {

@@ -18,6 +18,14 @@ impl SubCommand for Review {
 
         let diff = String::from_utf8(diffcommand.stdout).unwrap();
 
+        if diff.is_empty() {
+            println!(
+                "No changes detected in the current branch against base branch : '{}'",
+                config.base_branch
+            );
+            return Ok(());
+        }
+
         let ai = AI::new(diff.into());
 
         let review_prompt = "You are an expert senior software engineer with over 15 years of experience in software development, architecture, and code review. Your task is to perform a detailed, critical, and thorough review of a pull request based on a Git diff that I will provide. The code is written by a senior software engineer, and your review should reflect the high standards expected of such a contributor. Your review should include the following:

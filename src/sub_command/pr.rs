@@ -19,6 +19,13 @@ impl SubCommand for PullRequest {
 
         let diff = String::from_utf8(diffcommand.stdout).unwrap();
 
+        if diff.is_empty() {
+            println!(
+                "No changes detected in the current branch against base branch : '{}'",
+                config.base_branch
+            );
+            return Ok(());
+        }
         let ai = AI::new(diff.into());
 
         let pr_description_prompt = if config.has_categories() {
