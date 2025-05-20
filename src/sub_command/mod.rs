@@ -1,10 +1,12 @@
 use crate::args::{Arguments, SubCommand as SubCommandTypes};
 use crate::config::Config;
 mod critique;
+mod debug;
 mod pr;
 mod review;
 
 use critique::Critique;
+use debug::DebugCnp;
 use pr::PullRequest;
 use review::Review;
 
@@ -30,6 +32,11 @@ pub async fn dispatch_sub_command(
         SubCommandTypes::Critique => {
             let critique = Critique {};
             critique.run(args, config).await
+        }
+
+        SubCommandTypes::Debug => {
+            let debug = DebugCnp {};
+            debug.run(args, config).await
         }
     }
 }

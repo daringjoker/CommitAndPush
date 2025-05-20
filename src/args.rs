@@ -1,7 +1,8 @@
 use clap::{Parser, Subcommand};
 
+use crate::config::LocalConfig;
+
 #[derive(Debug, Subcommand, Clone)]
-// #[Subcommand(rename_all = "lower")]
 pub enum SubCommand {
     /// Generate a Pull Request Message for the changes made in this branch
     Pr,
@@ -9,6 +10,8 @@ pub enum SubCommand {
     Review,
     /// Critique the changes made in this branch against the base branch
     Critique,
+    /// Print all the configurations for debugging
+    Debug,
 }
 
 #[derive(Parser, Debug, Clone)]
@@ -16,8 +19,9 @@ pub enum SubCommand {
 pub struct Arguments {
     #[command(subcommand)]
     pub subcmd: SubCommand,
-    #[clap(long = "base-branch", short = 'b')]
-    pub base_branch: Option<String>,
+
+    #[clap(flatten)]
+    pub config: LocalConfig,
 }
 
 impl Arguments {

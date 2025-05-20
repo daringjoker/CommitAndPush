@@ -10,11 +10,8 @@ use sub_command::dispatch_sub_command;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Arguments::parse_all();
-    let mut config = Config::parse();
-
-    if args.base_branch.is_some() {
-        config.base_branch = args.base_branch.as_ref().unwrap().clone();
-    }
+    let config = Config::parse();
+    let config = Config::merge_configs(config, args.config.clone());
 
     dispatch_sub_command(args, config).await
 }

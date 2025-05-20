@@ -1,3 +1,4 @@
+use clap::Args;
 use core::panic;
 use serde::{de::DeserializeOwned, Deserialize};
 use std::{
@@ -6,18 +7,32 @@ use std::{
     process::Command,
 };
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Args)]
 #[serde(rename_all = "camelCase")]
+#[clap(rename_all = "kebab-case")]
 pub struct LocalConfig {
+    #[clap(long, short)]
+    /// Prefex to the prompt used for the PR description
     pub prefix: Option<String>,
+
+    #[clap(long, short)]
+    /// Suffix to the prompt used for the PR description
     pub suffix: Option<String>,
-    pub base_branch: Option<String>,
+
+    #[clap(long, short)]
+    /// Default prompt to be used for the PR description
     pub default_prompt: Option<String>,
+
+    #[clap(long, short)]
+    /// Base branch against which the PR description is generated
+    pub base_branch: Option<String>,
+
     #[serde(flatten)]
+    #[clap(skip)]
     pub categories: std::collections::HashMap<String, CategoryConfig>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
     pub prefix: String,
@@ -28,7 +43,7 @@ pub struct Config {
     pub categories: std::collections::HashMap<String, CategoryConfig>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone, Args)]
 #[serde(rename_all = "camelCase")]
 pub struct CategoryConfig {
     desc: String,
@@ -54,7 +69,8 @@ impl Config {
         }
         return config;
     }
-    fn merge_configs(config: Config, local_config: LocalConfig) -> Config {
+
+    pub fn merge_configs(config: Config, local_config: LocalConfig) -> Config {
         let mut merged_config = config;
 
         if let Some(prefix) = local_config.prefix {
