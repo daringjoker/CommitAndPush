@@ -7,6 +7,7 @@ use std::{env, fs, path};
 pub struct Config {
     pub prefix: String,
     pub suffix: String,
+    pub base_branch: String,
     pub default_prompt: String,
     #[serde(flatten)]
     pub categories: std::collections::HashMap<String, CategoryConfig>,

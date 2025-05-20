@@ -9,10 +9,10 @@ impl SubCommand for Critique {
     async fn run(
         &self,
         _args: Arguments,
-        _config: Config,
+        config: Config,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let diffcommand = Command::new("git")
-            .args(["diff", "--patch", "origin/dev", "HEAD"])
+            .args(["diff", "--patch", &config.base_branch, "HEAD"])
             .output()
             .expect("failed to execute process");
 
