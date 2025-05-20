@@ -3,6 +3,7 @@ use serde::{de::DeserializeOwned, Deserialize};
 use std::{
     env, fs,
     path::{self, PathBuf},
+    process::Command,
 };
 
 #[derive(Debug, Deserialize)]
@@ -40,8 +41,13 @@ impl Config {
         let config_file_path = path::Path::new(&home_path).join(".cnp.toml");
         let config: Config = Config::parse_from_path(&config_file_path);
 
-        let current_directory = env::current_dir().unwrap();
-        let config_file_path = current_directory.join(".cnp.toml");
+        let top_level_dir_cmd = Command::new("git")
+            .args(["rev-parse", "--show-toplevel"])
+            .output()
+            .expect("failed to execute process");
+
+        let top_level_dir = String::from_utf8(top_level_dir_cmd.stdout).unwrap();
+        let config_file_path = path::Path::new(&top_level_dir.trim()).join(".cnp.toml");
         if config_file_path.exists() {
             let local_config: LocalConfig = Config::parse_from_path(&config_file_path);
             return Config::merge_configs(config, local_config);
